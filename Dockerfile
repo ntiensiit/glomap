@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /workspace
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     pkg-config \
     ninja-build \
@@ -34,23 +34,19 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.30.9/cmake-3.30.9
     && rm cmake-3.30.9-linux-x86_64.sh
 
 WORKDIR /workspace
-RUN git clone https://github.com/colmap/glomap.git
+RUN git clone --depth 1 https://github.com/colmap/glomap.git
+
 WORKDIR /workspace/glomap
-RUN mkdir build && cd build && /usr/local/bin/cmake .. -GNinja && ninja
+RUN mkdir build && \
+    cd build && \
+    /usr/local/bin/cmake .. -GNinja && \
+    ninja && \
+    ninja install
+
+COPY run.sh /workspace/run.sh
+RUN chmod +x /workspace/run.sh
 
 WORKDIR /workspace
-RUN mkdir -p /glomap/datasets/south-building
-WORKDIR /workspace/glomap/datasets/south-building
-RUN wget -O south-building.zip https://github.com/colmap/colmap/releases/download/3.11.1/south-building.zip
-RUN unzip south-building.zip
-RUN mkdir -p glomap_sparse
 
-WORKDIR /workspace/glomap/build
-RUN ./glomap/glomap mapper \
-    --database_path /workspace/glomap/datasets/south-building/database.db \
-    --image_path /workspace/glomap/datasets/south-building/images \
-    --output_path /workspace/glomap/datasets/south-building/glomap_sparse
-
-WORKDIR /workspace/glomap/build
-
-CMD ["/bin/bash"]
+ENTRYPOINT ["/workspace/run.sh"]
+CMD ["south-building"]

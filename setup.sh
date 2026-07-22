@@ -23,6 +23,8 @@ cd /tmp && wget https://github.com/Kitware/CMake/releases/download/v3.30.9/cmake
 cd - && mkdir -p build && cd build && \
     /usr/local/bin/cmake .. -GNinja && ninja && ninja install
 
+cd ..
+
 mkdir -p "$DATASETS_DIR" "$OUTPUTS_DIR"
 
 if [ ! -f "$DATASET_PATH/database.db" ]; then
@@ -37,5 +39,5 @@ glomap mapper --database_path "$DATASET_PATH/database.db" \
     --image_path "$DATASET_PATH/images" --output_path "$OUTPUT_PATH"
 
 for f in cameras.bin images.bin points3D.bin; do
-    [ ! -f "$OUTPUT_PATH/$f" ] && echo "ERROR: $f not generated" && exit 1
+    [ ! -f "$OUTPUT_PATH/0/$f" ] && echo "ERROR: $f not generated" && exit 1
 done

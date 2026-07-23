@@ -36,8 +36,18 @@ fi
 
 mkdir -p "$OUTPUT_PATH"
 glomap mapper --database_path "$DATASET_PATH/database.db" \
-    --image_path "$DATASET_PATH/images" --output_path "$OUTPUT_PATH"
+    --image_path "$DATASET_PATH/images" --output_path "$OUTPUT_PATH/sparse"
 
 for f in cameras.bin images.bin points3D.bin; do
-    [ ! -f "$OUTPUT_PATH/0/$f" ] && echo "ERROR: $f not generated" && exit 1
+    [ ! -f "$OUTPUT_PATH/sparse/0/$f" ] && echo "ERROR: $f not generated" && exit 1
 done
+
+apt-get update && apt-get install -y --no-install-recommends colmap
+
+colmap model_converter \
+    --input_path "$OUTPUT_PATH/sparse/0" \
+    --output_path "$OUTPUT_PATH/points.ply" \
+    --output_type PLY
+
+echo "Reconstruction complete: $OUTPUT_PATH/sparse/0"
+echo "PLY exported: $OUTPUT_PATH/points.ply"
